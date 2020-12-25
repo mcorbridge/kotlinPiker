@@ -125,7 +125,7 @@ class PokerGame {
                 }
             }
 
-            // let's find out who the poker rank of each players hand!
+            // let's find out the poker rank of each players hand!
             for (player in players) {
                 HandAnalysis.findValue(player.hand)
             }
