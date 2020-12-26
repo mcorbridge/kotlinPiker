@@ -20,26 +20,39 @@ import java.text.DecimalFormat
 // TODO track the percentage of the rank of the winning hands
 class PokerSimulation {
 
-    private var numMike:Int = 0
-    private var numJan:Int = 0
-    private var numWally:Int = 0
-    private var numKevin:Int = 0
-    private var numRichard:Int = 0
-    private var numRuns:Int = 9 // val of zero (0) means the simulation runs ONCE
+    private var numMike: Int = 0
+    private var numJan: Int = 0
+    private var numWally: Int = 0
+    private var numKevin: Int = 0
+    private var numRichard: Int = 0
 
-    fun doPcnt(numPlayerWins:Int, numRuns:Int):String{
+
+    private var numHighCard: Int = 0
+    private var numOnePair: Int = 0
+    private var numTwoPair: Int = 0
+    private var numThreeKind: Int = 0
+    private var numStraight: Int = 0
+    private var numFlush: Int = 0
+    private var numFullHouse: Int = 0
+    private var numFourKind: Int = 0
+    private var numStraightFlush: Int = 0
+    private var numRoyalFlush: Int = 0
+
+    private var numRuns: Int = 999 // val of zero (0) means the simulation runs ONCE
+
+    private fun doPcnt(numPlayerWins: Int, numRuns: Int): String {
         val decimalFormat = DecimalFormat("##.#")
         decimalFormat.roundingMode = RoundingMode.UP
         return decimalFormat.format((numPlayerWins.toDouble() / (numRuns.toDouble() + 1.0)) * 100)
     }
 
-    init{
+    init {
 
-        fun start(){
+        fun start() {
 
-            for(n in 0..numRuns)run {
-                var winner:Winner = PokerGame.findWinner() // each players hand has been dealt at this point
-                when{
+            for (n in 0..numRuns) run {
+                val winner: Winner = PokerGame.findWinner() // each players hand has been dealt at this point
+                when {
                     winner.name.contains("Mike") -> numMike++
                     winner.name.contains("Jan") -> numJan++
                     winner.name.contains("Wally") -> numWally++
@@ -47,20 +60,48 @@ class PokerSimulation {
                     winner.name.contains("Richard") -> numRichard++
                     else -> println("no such winner")
                 }
-                println("${winner.name} won with ${winner.winningHand} type: ${winner.status}")
+                when {
+                    winner.winningHand.contains("high card") -> numHighCard++
+                    winner.winningHand.contains("one pair") -> numOnePair++
+                    winner.winningHand.contains("two pair") -> numTwoPair++
+                    winner.winningHand.contains("three of a kind") -> numThreeKind++
+                    winner.winningHand.contains("simple straight") -> numStraight++
+                    winner.winningHand.contains("simple flush") -> numFlush++
+                    winner.winningHand.contains("full house") -> numFullHouse++
+                    winner.winningHand.contains("four of a kind") -> numFourKind++
+                    winner.winningHand.contains("straight flush") -> numStraightFlush++
+                    winner.winningHand.contains("royal flush") -> numRoyalFlush++
+                    else -> println("NOT A POKER HAND TYPE")
+                }
+                println("|${winner.name}|${winner.winningHand}|${winner.status}|")
             }
 
-            var pcntMike = doPcnt(numMike, numRuns)
-            var pcntJan = doPcnt(numJan, numRuns)
-            var pcntWally = doPcnt(numWally, numRuns)
-            var pcntKevin = doPcnt(numKevin, numRuns)
-            var pcntRichard = doPcnt(numRichard, numRuns)
+            val pcntMike = doPcnt(numMike, numRuns)
+            val pcntJan = doPcnt(numJan, numRuns)
+            val pcntWally = doPcnt(numWally, numRuns)
+            val pcntKevin = doPcnt(numKevin, numRuns)
+            val pcntRichard = doPcnt(numRichard, numRuns)
 
-            println("Mike won $numMike times [$pcntMike%]")
-            println("Jan won $numJan times [$pcntJan%]")
-            println("Wally won $numWally times [$pcntWally%]")
-            println("Kevin won $numKevin times [$pcntKevin%]")
-            println("Richard won $numRichard times [$pcntRichard%]")
+
+            println("-------------- STATS -------------")
+            println("|--- Mike won $numMike times [$pcntMike%]")
+            println("|--- Jan won $numJan times [$pcntJan%]")
+            println("|--- Wally won $numWally times [$pcntWally%]")
+            println("|--- Kevin won $numKevin times [$pcntKevin%]")
+            println("|--- Richard won $numRichard times [$pcntRichard%]")
+            println("========================================")
+            print("| high card: $numHighCard")
+            print("| one pair: $numOnePair")
+            print("| two pair: $numTwoPair")
+            print("| three of a kind: $numThreeKind")
+            print("| straight: $numStraight")
+            print("| flush: $numFlush")
+            print("| full house: $numFullHouse")
+            print("| four of a kind: $numFourKind")
+            print("| straight flush: $numStraightFlush")
+            print("| royal flush: $numRoyalFlush")
+
+
         }
 
         start() // <--- this starts the whole show

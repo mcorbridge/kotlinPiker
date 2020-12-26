@@ -176,22 +176,22 @@ class PokerGame {
 
             // TODO add code to handle all types of poker hand ties (maybe move this into a utility class?)
             /**
-             * High Card, Pair, Two Pair, Three of a Kind, Straight, Flush, Full House, Four of a Kind, Straight Flush, Royal Flush
+             * High Card, One Pair, Two Pair, Three of a Kind, Straight, Flush, Full House, Four of a Kind, Straight Flush, Royal Flush
              *    4X       2X      2X                        4X        4X                                      4X            4X
              */
             if (listTies.size > 1) {
                 val tieBreaker: MutableList<String> = when (listTies[0].hand.type) {
                     "high card" -> doTiedHighCard(listTies)
-                    "pair" -> doTiedPair(listTies)
+                    "one pair" -> doTiedPair(listTies)
                     "two pair" -> doTwoTiedPair(listTies)
-                    "straight" -> doTiedStraight(listTies)
-                    "flush" -> doTiedFlush(listTies)
+                    "simple straight" -> doTiedStraight(listTies)
+                    "simple flush" -> doTiedFlush(listTies)
                     "straight flush" -> doTiedStraightFlush(listTies)
                     "royal flush" -> doTiedRoyalFlush(listTies)
                     else -> mutableListOf("nada")
                 }
                 winner.name.add(tieBreaker[0]) // player name
-                winner.winningHand = (tieBreaker[1]) // winning hand type (pair, two pair, straight, ...etc)
+                winner.winningHand = (tieBreaker[1]) // winning hand type (one pair, two pair, straight, ...etc)
                 winner.status = (tieBreaker[2]) // hand status (simple; from tie; from RRoP)
             } else { // there are no tied hands
                 winner.name.add(currentWinningPlayer.name)// player name
@@ -270,8 +270,8 @@ class PokerGame {
                 if (tmp.size == listTies.size) {
                     winnerName = tmp.flatten().maxWithOrNull(compareBy { it.second.value.first })?.first ?: break
                     tieInfo.add(winnerName)
-                    tieInfo.add("pair")
-                    tieInfo.add("determined from tied pair")
+                    tieInfo.add("one pair")
+                    tieInfo.add("determined from tied one pair")
                     isRRoP = false
                     break
                 }
@@ -282,7 +282,7 @@ class PokerGame {
             if (isRRoP) {
                 winnerName = findRobertsRuleHighCard(concat)
                 tieInfo.add(winnerName)
-                tieInfo.add("pair")
+                tieInfo.add("one pair")
                 tieInfo.add("determined from RRoP")
             }
             return tieInfo
@@ -348,7 +348,7 @@ class PokerGame {
             }
 
             tieInfo.add(findRobertsRuleHighCard(concat)) // must be player name
-            tieInfo.add("straight") // must be winning hand type
+            tieInfo.add("simple straight") // must be winning hand type
             tieInfo.add("determined from tie") // must be how win was determined
             return tieInfo
         }
@@ -402,11 +402,11 @@ class PokerGame {
 
             if (isRRoP) {
                 tieInfo.add(findRobertsRuleHighCard(concat, testFive = true)) // (PH,H1,H2,H3,H4) vs (H1,H2,H3,H4)
-                tieInfo.add("flush")
+                tieInfo.add("simple flush")
                 tieInfo.add("determined from RRoP tied flush")
             } else {
                 tieInfo.add(winnerName)
-                tieInfo.add("flush")
+                tieInfo.add("simple flush")
                 tieInfo.add("determined from tied flush")
             }
             return tieInfo
@@ -555,7 +555,7 @@ class HandAnalysis {
 
             // cascade throught the possible poker hands
             findHighCard() // every hand will at least be have a High Card
-            findPair()
+            findOnePair()
             findTwoPair()
             findThreeOfKind()
             findStraight()
@@ -587,7 +587,7 @@ class HandAnalysis {
 
         /* Pair 1.366 : 1
         Two cards of the same rank.*/
-        private fun findPair() {
+        private fun findOnePair() {
             var isPair = false
 
             val frequenciesByValue: Map<Int, Int> =
@@ -623,7 +623,7 @@ class HandAnalysis {
                         n++
                     }
                 }
-                hand.type = "pair"
+                hand.type = "one pair"
                 hand.rank = 2
             }
         }
@@ -633,8 +633,7 @@ class HandAnalysis {
         private fun findTwoPair() {
             var isTwoPair = false
 
-            val frequenciesByValue: Map<Int, Int> =
-                sortedHand.groupingBy { it.value }.eachCount()
+            val frequenciesByValue: Map<Int, Int> = sortedHand.groupingBy { it.value }.eachCount()
 
             var numPairs = 0
             var maxPairValue = 0
@@ -648,8 +647,8 @@ class HandAnalysis {
                 }
             }
 
-            // here we annotate the two pairs as the greater (PH1) one, and lesser one (PH2)
-            // plus a high card to allow hands of pairs to be rated
+            // here we annotate the two pairs as the greater (PH1), and lesser (PH2)
+            // plus a high card to allow hands of pairs to be rated (in case of tie)
             if (numPairs == 2) {
                 isTwoPair = true
                 hand.highCards = mutableMapOf()
@@ -657,13 +656,10 @@ class HandAnalysis {
                 val pk2 = (frequenciesByValue.filterValues { it == 2 }.keys).toIntArray()[1]
                 for (card in sortedHand) {
                     if (card.value == pk1) {
-                        //card.pokerValue = "PH1"
                         hand.highCards["PH1"] = Pair(card.value, card.suit)
                     } else if (card.value == pk2) {
-                        //card.pokerValue = "PH2"
                         hand.highCards["PH2"] = Pair(card.value, card.suit)
                     } else {
-                        //card.pokerValue = "H1"
                         hand.highCards["H1"] = Pair(card.value, card.suit)
                     }
                 }
@@ -732,7 +728,7 @@ class HandAnalysis {
 
             if (isStraight) {
                 hand.value = sortedHand[4].value //<- highest card in sequence
-                hand.type = "straight"
+                hand.type = "simple straight"
                 hand.rank = 5
                 hand.highCards = mutableMapOf()
                 hand.highCards["H4"] = Pair(sortedHand[4].value, sortedHand[4].suit)
@@ -757,7 +753,7 @@ class HandAnalysis {
 
             if (isFlush) {
                 hand.value = sortedHand[0].value //<- higest card in flush
-                hand.type = "flush"
+                hand.type = "simple flush"
                 hand.rank = 6
                 hand.highCards = mutableMapOf()
                 hand.highCards["H4"] = Pair(sortedHand[4].value, sortedHand[4].suit)
