@@ -26,7 +26,6 @@ class PokerSimulation {
     private var numKevin: Int = 0
     private var numRichard: Int = 0
 
-
     private var numHighCard: Int = 0
     private var numOnePair: Int = 0
     private var numTwoPair: Int = 0
@@ -38,7 +37,19 @@ class PokerSimulation {
     private var numStraightFlush: Int = 0
     private var numRoyalFlush: Int = 0
 
-    private var numRuns: Int = 999 // val of zero (0) means the simulation runs ONCE
+    private var numRuns: Int = 9 // var numRuns: Int = 0 (Zero) means the simulation runs ONCE
+
+    // RESULTS OF 100,000 SIMULATED HANDS:
+    // high card: 3,445
+    // one pair: 64,279
+    // two pair: 19,074
+    // three of a kind: 9,725
+    // straight: 1,691
+    // flush: 965
+    // full house: 680
+    // four of a kind: 134
+    // straight flush: 6
+    // royal flush: 1
 
     private fun doPcnt(numPlayerWins: Int, numRuns: Int): String {
         val decimalFormat = DecimalFormat("##.#")
